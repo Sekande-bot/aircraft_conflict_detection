@@ -130,3 +130,42 @@ def closest_approach_brute_force(aircraft_a, aircraft_b, max_time=600, dt=1):
         t += dt
     
     return t_closest, min_distance
+
+    def detect_conflict_window(aircraft_a, aircraft_b, lookahead_time=600, dt=1.0):
+    """
+    Conflict = horizontal AND vertical separation both below thresholds
+    at the SAME moment, checked across the whole lookahead window.
+
+    Uses the closest-approach time as a candidate, then checks a short
+    window around it, because horizontal and vertical minima can occur
+    at different times.
+    """
+    HORIZ_THRESHOLD = 9260  # 5 NM
+    VERT_THRESHOLD = 305    # 1000 ft
+
+    min_horiz_dist = float('inf')
+    min_vert_dist = float('inf')
+    conflict_time = None
+
+    t = 0.0
+    while t <= lookahead_time:
+        pos_a = position_at_time(aircraft_a, t)
+        pos_b = position_at_time(aircraft_b, t)
+
+        horiz = ((pos_b[0] - pos_a[0]) ** 2 + (pos_b[1] - pos_a[1]) ** 2) ** 0.5
+        vert = abs(pos_b[2] - pos_a[2])
+
+        min_horiz_dist = min(min_horiz_dist, horiz)
+        min_vert_dist = min(min_vert_dist, vert)
+
+        if horiz < HORIZ_THRESHOLD and vert < VERT_THRESHOLD and conflict_time is None:
+            conflict_time = t
+
+        t += dt
+
+    return {
+        'conflict': conflict_time is not None,
+        't_closest': conflict_time,
+        'min_horiz_dist': min_horiz_dist,
+        'min_vert_dist': min_vert_dist,
+    }
