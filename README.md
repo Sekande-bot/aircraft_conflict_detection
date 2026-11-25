@@ -20,3 +20,5 @@ The random group contains only 1 true conflict in 1,000 pairs, so its detection 
 - **Discrete sweep:** the ground truth and v2 use 1-second steps and can miss very brief conflicts.
 - **v1 definition gap:** closest-approach timing can miss a moment when both limits are violated together. This accounts for the 22.36% miss rate.
 - **Synthetic scenarios:** traffic is generated randomly, not observed. 
+
+- **Definition gap found and fixed:** the first version checked separation only at the moment of closest 3D approach. It missed conflicts where both limits were violated at a different moment. The window-sweep version (v2) catches these, at about 100x the runtime.
